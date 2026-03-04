@@ -32,25 +32,30 @@ export function Scanner({ onScan }: ScannerProps) {
   const startScanning = async () => {
     if (!scanner) return;
     try {
-      await scanner.start(
-        { facingMode: "environment" },
-        { 
-          fps: 10, 
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0 
-        },
-        (decodedText, result) => {
-          // Add a tiny delay to prevent rapid-fire scanning
-          setTimeout(() => {
-            onScan(decodedText, result?.result?.format?.formatName || 'QR_CODE');
-            // Haptic feedback if available
-            if (navigator.vibrate) navigator.vibrate([200]);
-          }, 300);
-        },
-        () => {} // ignore normal read errors (happens constantly until valid scan)
-      );
-      setIsScanning(true);
-      setHasCamera(true);
+      const devices = await Html5Qrcode.getCameras();
+      if (devices && devices.length > 0) {
+        await scanner.start(
+          { facingMode: "environment" },
+          { 
+            fps: 10, 
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0 
+          },
+          (decodedText, result) => {
+            // Add a tiny delay to prevent rapid-fire scanning
+            setTimeout(() => {
+              onScan(decodedText, result?.result?.format?.formatName || 'QR_CODE');
+              // Haptic feedback if available
+              if (navigator.vibrate) navigator.vibrate([200]);
+            }, 300);
+          },
+          () => {} // ignore normal read errors
+        );
+        setIsScanning(true);
+        setHasCamera(true);
+      } else {
+        setHasCamera(false);
+      }
     } catch (err) {
       console.error("Failed to start camera", err);
       setHasCamera(false);
@@ -95,9 +100,12 @@ export function Scanner({ onScan }: ScannerProps) {
   // Start scanning automatically if camera is available
   useEffect(() => {
     if (scanner && !isScanning && hasCamera) {
-      startScanning();
+      const timer = setTimeout(() => {
+        startScanning();
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [scanner]);
+  }, [scanner, isScanning, hasCamera]);
 
   return (
     <div className="relative w-full max-w-md mx-auto overflow-hidden rounded-[2.5rem] bg-black shadow-2xl shadow-primary/20 aspect-[3/4] flex flex-col justify-center items-center border-4 border-gray-900">
