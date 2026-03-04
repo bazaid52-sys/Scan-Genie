@@ -14,9 +14,9 @@ export async function registerRoutes(
   await setupAuth(app);
   registerAuthRoutes(app);
 
-  app.get(api.scans.list.path, isAuthenticated, async (req: any, res) => {
+  app.get(api.scans.list.path, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub || "anonymous";
       const userScans = await storage.getScans(userId);
       res.json(userScans);
     } catch (error) {
@@ -25,9 +25,9 @@ export async function registerRoutes(
     }
   });
 
-  app.post(api.scans.create.path, isAuthenticated, async (req: any, res) => {
+  app.post(api.scans.create.path, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub || "anonymous";
       const input = api.scans.create.input.parse(req.body);
       const scan = await storage.createScan(userId, input);
       res.status(201).json(scan);
@@ -42,7 +42,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.scans.delete.path, isAuthenticated, async (req: any, res) => {
+  app.delete(api.scans.delete.path, async (req: any, res) => {
     try {
       const id = Number(req.params.id);
       if (isNaN(id)) {

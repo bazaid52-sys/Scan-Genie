@@ -4,11 +4,12 @@ import { Scanner } from "@/components/scanner";
 import { ScanResultCard } from "@/components/scan-result-card";
 import { useCreateScan, useScans } from "@/hooks/use-scans";
 import { formatDistanceToNow } from "date-fns";
-import { QrCode, Clock } from "lucide-react";
-import { Card } from "@/components/ui-elements";
+import { QrCode, Clock, Camera } from "lucide-react";
+import { Card, Button } from "@/components/ui-elements";
 
 export default function Home() {
   const [currentScan, setCurrentScan] = useState<{ content: string; format: string } | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
   const createScan = useCreateScan();
   const { data: scans } = useScans();
 
@@ -18,6 +19,7 @@ export default function Home() {
     
     setCurrentScan({ content, format });
     createScan.mutate({ content, format });
+    setShowScanner(false);
   };
 
   const recentScans = scans?.slice(0, 3) || [];
@@ -27,10 +29,27 @@ export default function Home() {
       <div className="space-y-8 animate-in fade-in duration-500">
         <div className="text-center md:text-left space-y-2">
           <h2 className="text-3xl font-bold font-display text-foreground">Scanner</h2>
-          <p className="text-muted-foreground text-lg">Point your camera at a code or upload an image.</p>
+          <p className="text-muted-foreground text-lg">Quickly scan QR codes and barcodes.</p>
         </div>
 
-        <Scanner onScan={handleScan} />
+        {!showScanner ? (
+          <Card className="p-12 border-dashed flex flex-col items-center justify-center bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer group" onClick={() => setShowScanner(true)}>
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Camera className="w-10 h-10 text-primary" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Tap to Scan</h3>
+            <p className="text-muted-foreground text-center max-w-xs">
+              Open your camera to instantly recognize any QR code or barcode.
+            </p>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            <Scanner onScan={handleScan} />
+            <Button variant="outline" className="w-full" onClick={() => setShowScanner(false)}>
+              Cancel Scanning
+            </Button>
+          </div>
+        )}
 
         {currentScan && (
           <ScanResultCard 

@@ -33,9 +33,8 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 function Router() {
   return (
     <Switch>
-      <Route path="/login" component={AuthPage} />
-      <Route path="/" component={() => <ProtectedRoute component={Home} />} />
-      <Route path="/history" component={() => <ProtectedRoute component={HistoryPage} />} />
+      <Route path="/" component={Home} />
+      <Route path="/history" component={HistoryPage} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />

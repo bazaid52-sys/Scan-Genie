@@ -7,7 +7,7 @@ import { users } from "./models/auth";
 
 export const scans = pgTable("scans", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
+  userId: varchar("user_id"), // Optional for anonymous scans
   content: text("content").notNull(),
   format: text("format").notNull(), // 'qr', 'barcode', etc.
   createdAt: timestamp("created_at").defaultNow().notNull(),

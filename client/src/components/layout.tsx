@@ -39,14 +39,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="p-4 border-t border-border/50">
-          <button
-            onClick={() => logout()}
-            disabled={isLoggingOut}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-          >
-            <LogOut className="w-5 h-5" />
-            Sign out
-          </button>
+          <div className="px-4 py-3 text-xs text-muted-foreground text-center">
+            ScanFlow v1.0
+          </div>
         </div>
       </aside>
 
@@ -57,9 +52,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <h1 className="text-xl font-bold font-display bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
             ScanFlow
           </h1>
-          <button onClick={() => logout()} className="p-2 text-muted-foreground hover:text-foreground bg-secondary/50 rounded-full">
-            <LogOut className="w-5 h-5" />
-          </button>
         </header>
         
         <div className="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
