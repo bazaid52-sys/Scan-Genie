@@ -1,6 +1,7 @@
-import { Copy, ExternalLink, CheckCircle2, X } from "lucide-react";
+import { Copy, ExternalLink, CheckCircle2, X, Share2 } from "lucide-react";
 import { Button, Card } from "./ui-elements";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ScanResultCardProps {
   content: string;
@@ -10,18 +11,39 @@ interface ScanResultCardProps {
 
 export function ScanResultCard({ content, format, onClose }: ScanResultCardProps) {
   const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   const isUrl = content.startsWith("http://") || content.startsWith("https://");
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
     setCopied(true);
+    toast({
+      title: "Copied!",
+      description: "Link copied to clipboard",
+    });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleOpenLink = () => {
     if (isUrl) {
       window.open(content, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Scanned Content',
+          text: content,
+          url: isUrl ? content : undefined,
+        });
+      } catch (err) {
+        console.error("Share failed", err);
+      }
+    } else {
+      handleCopy();
     }
   };
 
@@ -44,21 +66,27 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
         </h3>
       </div>
 
-      <div className="flex gap-3 mt-6">
-        <Button onClick={handleCopy} variant="secondary" className="flex-1">
+      <div className="grid grid-cols-2 gap-3 mt-6">
+        <Button onClick={handleCopy} variant="secondary" className="w-full">
           {copied ? (
             <span className="flex items-center gap-2 text-green-600 dark:text-green-500">
-              <CheckCircle2 className="w-4 h-4" /> Copied!
+              <CheckCircle2 className="w-4 h-4" /> Copied
             </span>
           ) : (
             <span className="flex items-center gap-2">
-              <Copy className="w-4 h-4" /> Copy Text
+              <Copy className="w-4 h-4" /> Copy
             </span>
           )}
         </Button>
+
+        <Button onClick={handleShare} variant="outline" className="w-full">
+          <span className="flex items-center gap-2">
+            <Share2 className="w-4 h-4" /> Share
+          </span>
+        </Button>
         
         {isUrl && (
-          <Button onClick={handleOpenLink} className="flex-1">
+          <Button onClick={handleOpenLink} className="col-span-2">
             <span className="flex items-center gap-2">
               Open Link <ExternalLink className="w-4 h-4" />
             </span>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
-import { Flashlight, Image as ImageIcon, Camera, ScanLine } from "lucide-react";
+import { Flashlight, Image as ImageIcon, Camera, ScanLine, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "./ui-elements";
 
 interface ScannerProps {
@@ -12,6 +12,9 @@ export function Scanner({ onScan }: ScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
   const [hasCamera, setHasCamera] = useState<boolean>(true);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [maxZoom, setMaxZoom] = useState(1);
+  const [minZoom, setMinZoom] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -53,6 +56,21 @@ export function Scanner({ onScan }: ScannerProps) {
         );
         setIsScanning(true);
         setHasCamera(true);
+
+        // Try to get zoom capabilities
+        try {
+          const track = scanner.getRunningTrack();
+          if (track) {
+            const capabilities = track.getCapabilities() as any;
+            if (capabilities.zoom) {
+              setMinZoom(capabilities.zoom.min);
+              setMaxZoom(capabilities.zoom.max);
+              setZoomLevel(capabilities.zoom.min);
+            }
+          }
+        } catch (e) {
+          console.warn("Zoom not supported", e);
+        }
       } else {
         setHasCamera(false);
       }
@@ -78,6 +96,18 @@ export function Scanner({ onScan }: ScannerProps) {
         setTorchOn(newTorchState);
       } catch (err) {
         console.warn("Torch not supported on this device", err);
+      }
+    }
+  };
+
+  const handleZoom = async (newZoom: number) => {
+    if (scanner && scanner.getState() === Html5QrcodeScannerState.SCANNING) {
+      const clampedZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+      try {
+        await scanner.applyVideoConstraints({ advanced: [{ zoom: clampedZoom }] as any });
+        setZoomLevel(clampedZoom);
+      } catch (err) {
+        console.warn("Zoom update failed", err);
       }
     }
   };
@@ -147,35 +177,62 @@ export function Scanner({ onScan }: ScannerProps) {
       )}
 
       {/* Controls Overlay */}
-      <div className="absolute bottom-6 left-0 right-0 z-30 flex justify-center gap-4 px-6">
-        <Button 
-          variant={torchOn ? "default" : "glass"} 
-          size="icon" 
-          onClick={toggleTorch}
-          disabled={!isScanning}
-          className="rounded-full w-14 h-14"
-          aria-label="Toggle Flashlight"
-        >
-          <Flashlight className="w-6 h-6" />
-        </Button>
-        
-        <div className="relative">
+      <div className="absolute bottom-6 left-0 right-0 z-30 flex flex-col items-center gap-4 px-6">
+        {/* Zoom Controls */}
+        {isScanning && maxZoom > minZoom && (
+          <div className="flex items-center gap-4 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 mb-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => handleZoom(zoomLevel - 0.5)}
+              className="h-8 w-8 text-white hover:bg-white/10"
+            >
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <span className="text-white text-xs font-medium w-8 text-center">
+              {zoomLevel.toFixed(1)}x
+            </span>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => handleZoom(zoomLevel + 0.5)}
+              className="h-8 w-8 text-white hover:bg-white/10"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+
+        <div className="flex justify-center gap-4">
           <Button 
-            variant="glass" 
-            size="icon"
-            className="rounded-full w-14 h-14 overflow-hidden"
-            onClick={() => fileInputRef.current?.click()}
-            aria-label="Upload Image"
+            variant={torchOn ? "default" : "glass"} 
+            size="icon" 
+            onClick={toggleTorch}
+            disabled={!isScanning}
+            className="rounded-full w-14 h-14"
+            aria-label="Toggle Flashlight"
           >
-            <ImageIcon className="w-6 h-6" />
+            <Flashlight className="w-6 h-6" />
           </Button>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileUpload} 
-            accept="image/*" 
-            className="hidden" 
-          />
+          
+          <div className="relative">
+            <Button 
+              variant="glass" 
+              size="icon"
+              className="rounded-full w-14 h-14 overflow-hidden"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Upload Image"
+            >
+              <ImageIcon className="w-6 h-6" />
+            </Button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              accept="image/*" 
+              className="hidden" 
+            />
+          </div>
         </div>
       </div>
     </div>
