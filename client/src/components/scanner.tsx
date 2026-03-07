@@ -37,40 +37,45 @@ export function Scanner({ onScan }: ScannerProps) {
     try {
       const devices = await Html5Qrcode.getCameras();
       if (devices && devices.length > 0) {
+        // Find the best camera (usually "environment" for rear camera)
         await scanner.start(
           { facingMode: "environment" },
           { 
-            fps: 10, 
+            fps: 15, // Increased FPS for smoother zoom updates
             qrbox: { width: 250, height: 250 },
             aspectRatio: 1.0 
           },
           (decodedText, result) => {
-            // Add a tiny delay to prevent rapid-fire scanning
             setTimeout(() => {
               onScan(decodedText, result?.result?.format?.formatName || 'QR_CODE');
-              // Haptic feedback if available
               if (navigator.vibrate) navigator.vibrate([200]);
             }, 300);
           },
-          () => {} // ignore normal read errors
+          () => {} 
         );
         setIsScanning(true);
         setHasCamera(true);
 
-        // Try to get zoom capabilities
-        try {
-          const track = scanner.getRunningTrack();
-          if (track) {
-            const capabilities = track.getCapabilities() as any;
-            if (capabilities.zoom) {
-              setMinZoom(capabilities.zoom.min);
-              setMaxZoom(capabilities.zoom.max);
-              setZoomLevel(capabilities.zoom.min);
+        // Wait a bit for the track to be fully initialized before getting capabilities
+        setTimeout(async () => {
+          try {
+            const track = scanner.getRunningTrack();
+            if (track) {
+              const capabilities = track.getCapabilities() as any;
+              console.log("Camera capabilities:", capabilities);
+              if (capabilities.zoom) {
+                setMinZoom(capabilities.zoom.min);
+                setMaxZoom(capabilities.zoom.max);
+                setZoomLevel(capabilities.zoom.min);
+              } else {
+                // Fallback or explicit "not supported" state
+                console.log("Zoom not supported by this camera hardware/driver");
+              }
             }
+          } catch (e) {
+            console.warn("Error getting zoom capabilities", e);
           }
-        } catch (e) {
-          console.warn("Zoom not supported", e);
-        }
+        }, 1000);
       } else {
         setHasCamera(false);
       }

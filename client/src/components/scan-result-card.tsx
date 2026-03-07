@@ -66,30 +66,30 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
         </h3>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mt-6">
-        <Button onClick={handleCopy} variant="secondary" className="w-full">
+      <div className="grid grid-cols-3 gap-2 mt-6">
+        <Button onClick={handleCopy} variant="secondary" className="w-full px-2 py-2 h-auto text-xs flex flex-col gap-1">
           {copied ? (
-            <span className="flex items-center gap-2 text-green-600 dark:text-green-500">
-              <CheckCircle2 className="w-4 h-4" /> Copied
-            </span>
+            <>
+              <CheckCircle2 className="w-4 h-4 text-green-600" />
+              <span>Copied</span>
+            </>
           ) : (
-            <span className="flex items-center gap-2">
-              <Copy className="w-4 h-4" /> Copy
-            </span>
+            <>
+              <Copy className="w-4 h-4" />
+              <span>Copy</span>
+            </>
           )}
         </Button>
 
-        <Button onClick={handleShare} variant="outline" className="w-full">
-          <span className="flex items-center gap-2">
-            <Share2 className="w-4 h-4" /> Share
-          </span>
+        <Button onClick={handleShare} variant="outline" className="w-full px-2 py-2 h-auto text-xs flex flex-col gap-1">
+          <Share2 className="w-4 h-4" />
+          <span>Share</span>
         </Button>
-        
+
         {isUrl && (
-          <Button onClick={handleOpenLink} className="col-span-2">
-            <span className="flex items-center gap-2">
-              Open Link <ExternalLink className="w-4 h-4" />
-            </span>
+          <Button onClick={handleOpenLink} className="w-full px-2 py-2 h-auto text-xs flex flex-col gap-1">
+            <ExternalLink className="w-4 h-4" />
+            <span>Open</span>
           </Button>
         )}
       </div>
