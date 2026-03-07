@@ -107,12 +107,30 @@ export function Scanner({ onScan }: ScannerProps) {
 
   const handleZoom = async (newZoom: number) => {
     if (scanner && scanner.getState() === Html5QrcodeScannerState.SCANNING) {
-      const clampedZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+      // Use a broader range if capabilities aren't detected yet
+      const min = minZoom || 1;
+      const max = maxZoom || 10;
+      const clampedZoom = Math.max(min, Math.min(max, newZoom));
+      
       try {
-        await scanner.applyVideoConstraints({ advanced: [{ zoom: clampedZoom }] as any });
-        setZoomLevel(clampedZoom);
+        const track = scanner.getRunningTrack();
+        if (track) {
+          // Some browsers/devices require setting the whole constraints object
+          await track.applyConstraints({
+            advanced: [{ zoom: clampedZoom }] as any
+          });
+          setZoomLevel(clampedZoom);
+          console.log("Applied zoom:", clampedZoom);
+        }
       } catch (err) {
-        console.warn("Zoom update failed", err);
+        console.warn("Zoom update failed via track", err);
+        // Fallback to html5-qrcode method
+        try {
+          await scanner.applyVideoConstraints({ advanced: [{ zoom: clampedZoom }] as any });
+          setZoomLevel(clampedZoom);
+        } catch (innerErr) {
+          console.warn("Zoom update failed via scanner", innerErr);
+        }
       }
     }
   };

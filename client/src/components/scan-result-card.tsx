@@ -67,29 +67,34 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
       </div>
 
       <div className="grid grid-cols-3 gap-2 mt-6">
-        <Button onClick={handleCopy} variant="secondary" className="w-full px-2 py-2 h-auto text-xs flex flex-col gap-1">
+        <Button onClick={handleCopy} variant="secondary" className="w-full px-1 py-2 h-auto text-[10px] flex flex-col gap-1 min-w-0">
           {copied ? (
             <>
               <CheckCircle2 className="w-4 h-4 text-green-600" />
-              <span>Copied</span>
+              <span className="truncate">Copied</span>
             </>
           ) : (
             <>
               <Copy className="w-4 h-4" />
-              <span>Copy</span>
+              <span className="truncate">Copy</span>
             </>
           )}
         </Button>
 
-        <Button onClick={handleShare} variant="outline" className="w-full px-2 py-2 h-auto text-xs flex flex-col gap-1">
+        <Button onClick={handleShare} variant="outline" className="w-full px-1 py-2 h-auto text-[10px] flex flex-col gap-1 min-w-0">
           <Share2 className="w-4 h-4" />
-          <span>Share</span>
+          <span className="truncate">Share</span>
         </Button>
 
-        {isUrl && (
-          <Button onClick={handleOpenLink} className="w-full px-2 py-2 h-auto text-xs flex flex-col gap-1">
+        {isUrl ? (
+          <Button onClick={handleOpenLink} className="w-full px-1 py-2 h-auto text-[10px] flex flex-col gap-1 min-w-0">
             <ExternalLink className="w-4 h-4" />
-            <span>Open</span>
+            <span className="truncate">Open</span>
+          </Button>
+        ) : (
+          <Button disabled variant="ghost" className="w-full px-1 py-2 h-auto text-[10px] flex flex-col gap-1 opacity-20 min-w-0">
+            <ExternalLink className="w-4 h-4" />
+            <span className="truncate">Open</span>
           </Button>
         )}
       </div>
