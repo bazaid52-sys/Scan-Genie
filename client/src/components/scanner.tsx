@@ -184,7 +184,7 @@ export function Scanner({ onScan }: ScannerProps) {
       {/* Controls Overlay */}
       <div className="absolute bottom-6 left-0 right-0 z-30 flex flex-col items-center gap-4 px-6">
         {/* Zoom Controls */}
-        {isScanning && maxZoom > minZoom && (
+        {isScanning && (
           <div className="flex items-center gap-4 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 mb-2">
             <Button 
               variant="ghost" 
