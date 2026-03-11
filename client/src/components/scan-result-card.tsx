@@ -96,12 +96,15 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
         </button>
 
         <button 
-          onClick={isUrl ? handleOpenLink : undefined}
-          disabled={!isUrl}
+          onClick={() => {
+            if (isUrl) {
+              handleOpenLink();
+            }
+          }}
           className={`flex flex-col items-center gap-1 px-2 py-2 text-[10px] rounded-md transition-colors pointer-events-auto ${
             isUrl 
-              ? 'bg-primary hover:bg-primary/90 text-primary-foreground' 
-              : 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
+              ? 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer' 
+              : 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed pointer-events-none'
           }`}
           data-testid="button-open-link"
         >
