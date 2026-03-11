@@ -48,10 +48,11 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
   };
 
   return (
-    <Card className="fixed bottom-6 left-6 right-6 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-md z-50 animate-in slide-in-from-bottom-8 fade-in duration-300 p-6 bg-card border-2 border-primary/20 shadow-2xl shadow-primary/10">
+    <Card className="fixed bottom-24 md:bottom-6 left-6 right-6 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-md z-[9999] animate-in slide-in-from-bottom-8 fade-in duration-300 p-6 bg-card border-2 border-primary/20 shadow-2xl shadow-primary/10 pointer-events-auto">
       <button 
         onClick={onClose}
-        className="absolute top-4 right-4 p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors"
+        className="absolute top-4 right-4 p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors pointer-events-auto"
+        data-testid="button-close-result"
       >
         <X className="w-5 h-5" />
       </button>
@@ -61,13 +62,17 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
           {format.replace(/_/g, ' ')}
         </span>
         
-        <h3 className="text-xl font-bold font-display text-foreground mb-4 break-words">
+        <h3 className="text-lg font-bold font-display text-foreground mb-4 break-words">
           {content}
         </h3>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mt-6">
-        <Button onClick={handleCopy} variant="secondary" className="w-full px-1 py-2 h-auto text-[10px] flex flex-col gap-1 min-w-0">
+      <div className="grid grid-cols-3 gap-2 mt-6 pointer-events-auto">
+        <button 
+          onClick={handleCopy}
+          className="flex flex-col items-center gap-1 px-2 py-2 text-[10px] rounded-md bg-secondary hover:bg-secondary/80 text-foreground transition-colors pointer-events-auto"
+          data-testid="button-copy"
+        >
           {copied ? (
             <>
               <CheckCircle2 className="w-4 h-4 text-green-600" />
@@ -79,24 +84,30 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
               <span className="truncate">Copy</span>
             </>
           )}
-        </Button>
+        </button>
 
-        <Button onClick={handleShare} variant="outline" className="w-full px-1 py-2 h-auto text-[10px] flex flex-col gap-1 min-w-0">
+        <button 
+          onClick={handleShare}
+          className="flex flex-col items-center gap-1 px-2 py-2 text-[10px] rounded-md border border-input hover:bg-accent/10 text-foreground transition-colors pointer-events-auto"
+          data-testid="button-share"
+        >
           <Share2 className="w-4 h-4" />
           <span className="truncate">Share</span>
-        </Button>
+        </button>
 
-        {isUrl ? (
-          <Button onClick={handleOpenLink} className="w-full px-1 py-2 h-auto text-[10px] flex flex-col gap-1 min-w-0">
-            <ExternalLink className="w-4 h-4" />
-            <span className="truncate">Open</span>
-          </Button>
-        ) : (
-          <Button disabled variant="ghost" className="w-full px-1 py-2 h-auto text-[10px] flex flex-col gap-1 opacity-20 min-w-0">
-            <ExternalLink className="w-4 h-4" />
-            <span className="truncate">Open</span>
-          </Button>
-        )}
+        <button 
+          onClick={isUrl ? handleOpenLink : undefined}
+          disabled={!isUrl}
+          className={`flex flex-col items-center gap-1 px-2 py-2 text-[10px] rounded-md transition-colors pointer-events-auto ${
+            isUrl 
+              ? 'bg-primary hover:bg-primary/90 text-primary-foreground' 
+              : 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed'
+          }`}
+          data-testid="button-open-link"
+        >
+          <ExternalLink className="w-4 h-4" />
+          <span className="truncate">Open</span>
+        </button>
       </div>
     </Card>
   );
