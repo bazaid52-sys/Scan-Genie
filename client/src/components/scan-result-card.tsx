@@ -26,7 +26,9 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
   };
 
   const handleOpenLink = () => {
+    console.log("handleOpenLink called, isUrl:", isUrl, "content:", content);
     if (isUrl) {
+      console.log("Opening URL:", content);
       window.open(content, "_blank", "noopener,noreferrer");
     }
   };
@@ -96,10 +98,10 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
         </button>
 
         <button 
-          onClick={() => {
-            if (isUrl) {
-              handleOpenLink();
-            }
+          onClick={(e) => {
+            console.log("Open button clicked, isUrl:", isUrl);
+            e.preventDefault();
+            handleOpenLink();
           }}
           className={`flex flex-col items-center gap-1 px-2 py-2 text-[10px] rounded-md transition-colors pointer-events-auto ${
             isUrl 
