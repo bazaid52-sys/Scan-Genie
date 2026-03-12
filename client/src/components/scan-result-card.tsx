@@ -21,13 +21,21 @@ interface Resolved {
 function resolve(raw: string): Resolved {
   const t = raw.trim();
 
-  // Already has a scheme
-  if (/^tel:/i.test(t))       return { type: "phone", href: t, label: "Call", icon: <Phone className="w-5 h-5" /> };
-  if (/^mailto:/i.test(t))    return { type: "email", href: t, label: "Email", icon: <Mail className="w-5 h-5" /> };
-  if (/^sms:/i.test(t))       return { type: "sms",   href: t, label: "Text", icon: <MessageSquare className="w-5 h-5" /> };
-  if (/^https?:\/\//i.test(t)) return { type: "url", href: t, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
-  if (/^ftp:\/\//i.test(t))   return { type: "url", href: t, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
-  if (/^www\./i.test(t))      return { type: "url", href: `https://${t}`, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
+  // Specific known schemes first
+  if (/^tel:/i.test(t))    return { type: "phone", href: t, label: "Call",  icon: <Phone className="w-5 h-5" /> };
+  if (/^mailto:/i.test(t)) return { type: "email", href: t, label: "Email", icon: <Mail className="w-5 h-5" /> };
+  if (/^sms:/i.test(t))    return { type: "sms",   href: t, label: "Text",  icon: <MessageSquare className="w-5 h-5" /> };
+  if (/^WIFI:/i.test(t))   return { type: "wifi",  href: null, label: "WiFi", icon: <Wifi className="w-5 h-5" /> };
+
+  // Any scheme:// — covers http, https, ftp, exp, geo, maps, intent, etc.
+  if (/^[a-zA-Z][a-zA-Z0-9+\-.]*:\/\//i.test(t)) {
+    return { type: "url", href: t, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
+  }
+
+  // www. prefix
+  if (/^www\./i.test(t)) {
+    return { type: "url", href: `https://${t}`, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
+  }
 
   // Bare domain like "youtube.com" or "youtube.com/watch?v=..."
   if (/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/|$|\?)/.test(t) && !t.includes(' ') && !t.includes('\n')) {
@@ -42,11 +50,6 @@ function resolve(raw: string): Resolved {
   // Bare email
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)) {
     return { type: "email", href: `mailto:${t}`, label: "Email", icon: <Mail className="w-5 h-5" /> };
-  }
-
-  // WiFi config (WIFI:T:WPA;S:name;P:pass;;)
-  if (/^WIFI:/i.test(t)) {
-    return { type: "wifi", href: null, label: "WiFi", icon: <Wifi className="w-5 h-5" /> };
   }
 
   return { type: "text", href: null, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
