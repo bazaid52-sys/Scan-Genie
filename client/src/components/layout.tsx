@@ -1,14 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { Scan, History, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { Scan, History, QrCode } from "lucide-react";
 import { cn } from "./ui-elements";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
-  const { logout, isLoggingOut } = useAuth();
 
   const navItems = [
     { href: "/", label: "Scan", icon: Scan },
+    { href: "/generate", label: "Generate", icon: QrCode },
     { href: "/history", label: "History", icon: History },
   ];
 

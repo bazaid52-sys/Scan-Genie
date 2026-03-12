@@ -1,5 +1,5 @@
 import { Copy, ExternalLink, CheckCircle2, X, Share2 } from "lucide-react";
-import { Button, Card } from "./ui-elements";
+import { Card } from "./ui-elements";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,14 +23,6 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
       description: "Link copied to clipboard",
     });
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleOpenLink = () => {
-    console.log("handleOpenLink called, isUrl:", isUrl, "content:", content);
-    if (isUrl) {
-      console.log("Opening URL:", content);
-      window.open(content, "_blank", "noopener,noreferrer");
-    }
   };
 
   const handleShare = async () => {
@@ -97,22 +89,26 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
           <span className="truncate">Share</span>
         </button>
 
-        <button 
-          onClick={(e) => {
-            console.log("Open button clicked, isUrl:", isUrl);
-            e.preventDefault();
-            handleOpenLink();
-          }}
-          className={`flex flex-col items-center gap-1 px-2 py-2 text-[10px] rounded-md transition-colors pointer-events-auto ${
-            isUrl 
-              ? 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer' 
-              : 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed pointer-events-none'
-          }`}
-          data-testid="button-open-link"
-        >
-          <ExternalLink className="w-4 h-4" />
-          <span className="truncate">Open</span>
-        </button>
+        {isUrl ? (
+          <a
+            href={content}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center gap-1 px-2 py-2 text-[10px] rounded-md bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer transition-colors pointer-events-auto no-underline"
+            data-testid="button-open-link"
+          >
+            <ExternalLink className="w-4 h-4" />
+            <span className="truncate">Open</span>
+          </a>
+        ) : (
+          <span
+            className="flex flex-col items-center gap-1 px-2 py-2 text-[10px] rounded-md bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
+            data-testid="button-open-link-disabled"
+          >
+            <ExternalLink className="w-4 h-4" />
+            <span className="truncate">Open</span>
+          </span>
+        )}
       </div>
     </Card>
   );

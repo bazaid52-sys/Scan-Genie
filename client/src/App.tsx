@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import AuthPage from "@/pages/auth";
 import Home from "@/pages/home";
 import HistoryPage from "@/pages/history";
+import GeneratePage from "@/pages/generate";
 import { Loader2 } from "lucide-react";
 
 // Protected Route Wrapper
@@ -35,6 +36,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/history" component={HistoryPage} />
+      <Route path="/generate" component={GeneratePage} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
