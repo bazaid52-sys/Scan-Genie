@@ -120,14 +120,20 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
         </button>
 
         {canOpen ? (
-          <a
-            href={resolved.href!}
-            className="flex flex-col items-center gap-1 px-2 py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-[11px] font-medium transition-colors no-underline text-center"
+          <button
+            onClick={() => {
+              const url = resolved.href!;
+              // Open in new tab — bypasses wouter's link interception
+              const w = window.open(url, "_blank", "noopener,noreferrer");
+              // If browser blocked the popup, fall back to same-tab navigation
+              if (!w) window.location.assign(url);
+            }}
+            className="flex flex-col items-center gap-1 px-2 py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-[11px] font-medium transition-colors text-center"
             data-testid="button-open-link"
           >
             {resolved.icon}
             {resolved.label}
-          </a>
+          </button>
         ) : (
           <div
             className="flex flex-col items-center gap-1 px-2 py-3 rounded-xl bg-muted text-muted-foreground opacity-40 text-[11px] font-medium cursor-not-allowed"
