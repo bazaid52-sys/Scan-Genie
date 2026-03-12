@@ -81,11 +81,6 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
     }
   };
 
-  const handleOpen = () => {
-    if (!resolved.href) return;
-    window.location.href = resolved.href;
-  };
-
   return (
     <Card className="fixed bottom-24 md:bottom-6 left-6 right-6 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-full md:max-w-md z-[9999] animate-in slide-in-from-bottom-8 fade-in duration-300 p-6 bg-card border-2 border-primary/20 shadow-2xl shadow-primary/10">
       <button
@@ -124,19 +119,24 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
           Share
         </button>
 
-        <button
-          onClick={handleOpen}
-          disabled={!canOpen}
-          className={`flex flex-col items-center gap-1 px-2 py-3 rounded-xl text-[11px] font-medium transition-colors ${
-            canOpen
-              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-              : "bg-muted text-muted-foreground opacity-40 cursor-not-allowed"
-          }`}
-          data-testid="button-open-link"
-        >
-          {resolved.icon}
-          {resolved.label}
-        </button>
+        {canOpen ? (
+          <a
+            href={resolved.href!}
+            className="flex flex-col items-center gap-1 px-2 py-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-[11px] font-medium transition-colors no-underline text-center"
+            data-testid="button-open-link"
+          >
+            {resolved.icon}
+            {resolved.label}
+          </a>
+        ) : (
+          <div
+            className="flex flex-col items-center gap-1 px-2 py-3 rounded-xl bg-muted text-muted-foreground opacity-40 text-[11px] font-medium cursor-not-allowed"
+            data-testid="button-open-link-disabled"
+          >
+            {resolved.icon}
+            {resolved.label}
+          </div>
+        )}
       </div>
 
       {!canOpen && (
