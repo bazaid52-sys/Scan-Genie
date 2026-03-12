@@ -1,4 +1,4 @@
-import { Copy, ExternalLink, CheckCircle2, X, Share2 } from "lucide-react";
+import { Copy, ExternalLink, CheckCircle2, X, Share2, Phone, Mail, Wifi, MessageSquare } from "lucide-react";
 import { Card } from "./ui-elements";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -9,24 +9,55 @@ interface ScanResultCardProps {
   onClose: () => void;
 }
 
-function resolveUrl(text: string): string | null {
-  const t = text.trim();
-  if (/^https?:\/\//i.test(t)) return t;
-  if (/^ftp:\/\//i.test(t)) return t;
-  if (/^www\./i.test(t)) return `https://${t}`;
-  // Looks like a domain (e.g. "youtube.com" or "youtube.com/watch?v=...")
+type ContentType = "url" | "phone" | "email" | "sms" | "wifi" | "text";
+
+interface Resolved {
+  type: ContentType;
+  href: string | null;
+  label: string;
+  icon: React.ReactNode;
+}
+
+function resolve(raw: string): Resolved {
+  const t = raw.trim();
+
+  // Already has a scheme
+  if (/^tel:/i.test(t))       return { type: "phone", href: t, label: "Call", icon: <Phone className="w-5 h-5" /> };
+  if (/^mailto:/i.test(t))    return { type: "email", href: t, label: "Email", icon: <Mail className="w-5 h-5" /> };
+  if (/^sms:/i.test(t))       return { type: "sms",   href: t, label: "Text", icon: <MessageSquare className="w-5 h-5" /> };
+  if (/^https?:\/\//i.test(t)) return { type: "url", href: t, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
+  if (/^ftp:\/\//i.test(t))   return { type: "url", href: t, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
+  if (/^www\./i.test(t))      return { type: "url", href: `https://${t}`, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
+
+  // Bare domain like "youtube.com" or "youtube.com/watch?v=..."
   if (/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/|$|\?)/.test(t) && !t.includes(' ') && !t.includes('\n')) {
-    return `https://${t}`;
+    return { type: "url", href: `https://${t}`, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
   }
-  return null;
+
+  // Bare phone number like "+1234567890" or "07712345678"
+  if (/^\+?[\d\s\-().]{7,15}$/.test(t) && t.replace(/\D/g, '').length >= 7) {
+    return { type: "phone", href: `tel:${t.replace(/\s/g, '')}`, label: "Call", icon: <Phone className="w-5 h-5" /> };
+  }
+
+  // Bare email
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)) {
+    return { type: "email", href: `mailto:${t}`, label: "Email", icon: <Mail className="w-5 h-5" /> };
+  }
+
+  // WiFi config (WIFI:T:WPA;S:name;P:pass;;)
+  if (/^WIFI:/i.test(t)) {
+    return { type: "wifi", href: null, label: "WiFi", icon: <Wifi className="w-5 h-5" /> };
+  }
+
+  return { type: "text", href: null, label: "Open", icon: <ExternalLink className="w-5 h-5" /> };
 }
 
 export function ScanResultCard({ content, format, onClose }: ScanResultCardProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  const url = resolveUrl(content);
-  const isUrl = url !== null;
+  const resolved = resolve(content);
+  const canOpen = resolved.href !== null;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content).catch(() => {});
@@ -38,7 +69,7 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Scanned Content", text: content, url: url ?? undefined });
+        await navigator.share({ title: "Scanned Content", text: content, url: resolved.type === "url" ? resolved.href ?? undefined : undefined });
       } catch {
         handleCopy();
       }
@@ -48,9 +79,8 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
   };
 
   const handleOpen = () => {
-    if (!url) return;
-    // Use location.href — works in every context: real browser, iframe, mobile
-    window.location.href = url;
+    if (!resolved.href) return;
+    window.location.href = resolved.href;
   };
 
   return (
@@ -93,21 +123,22 @@ export function ScanResultCard({ content, format, onClose }: ScanResultCardProps
 
         <button
           onClick={handleOpen}
+          disabled={!canOpen}
           className={`flex flex-col items-center gap-1 px-2 py-3 rounded-xl text-[11px] font-medium transition-colors ${
-            isUrl
+            canOpen
               ? "bg-primary text-primary-foreground hover:bg-primary/90"
               : "bg-muted text-muted-foreground opacity-40 cursor-not-allowed"
           }`}
           data-testid="button-open-link"
         >
-          <ExternalLink className="w-5 h-5" />
-          Open
+          {resolved.icon}
+          {resolved.label}
         </button>
       </div>
 
-      {!isUrl && (
+      {!canOpen && (
         <p className="text-[10px] text-muted-foreground text-center mt-3 opacity-60">
-          Open is only available for links
+          No action available for plain text
         </p>
       )}
     </Card>
