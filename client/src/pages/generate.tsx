@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { Layout } from "@/components/layout";
 import { QRCodeCanvas } from "qrcode.react";
 import {
-  Download, Palette, Sparkles, Wifi, MessageCircle, Instagram,
+  Download, Share2, Palette, Sparkles, Wifi, MessageCircle, Instagram,
   PenLine, Upload, X, Eye, EyeOff, ChevronDown, ChevronUp
 } from "lucide-react";
 import { Card } from "@/components/ui-elements";
@@ -217,6 +217,29 @@ export default function Generate() {
     toast({ title: "Downloaded!", description: "QR code saved as PNG." });
   };
 
+  const handleShare = async () => {
+    const canvas = canvasWrapRef.current?.querySelector("canvas") as HTMLCanvasElement;
+    if (!canvas) return;
+    try {
+      const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, "image/png"));
+      if (!blob) throw new Error("No blob");
+      const file = new File([blob], "qrcode.png", { type: "image/png" });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "QR Code", text: generatedText });
+      } else if (navigator.share) {
+        await navigator.share({ title: "QR Code", text: generatedText });
+      } else {
+        // Fallback: download instead
+        handleDownload();
+        toast({ title: "Sharing not supported", description: "QR code downloaded instead." });
+      }
+    } catch (err: any) {
+      if (err?.name !== "AbortError") {
+        toast({ title: "Could not share", description: "Try downloading instead.", variant: "destructive" });
+      }
+    }
+  };
+
   return (
     <Layout>
       <div className="space-y-6 animate-in fade-in duration-500">
@@ -389,11 +412,18 @@ export default function Generate() {
               <p className="text-xs text-muted-foreground break-all max-w-xs line-clamp-2">{generatedText}</p>
             </div>
 
-            <button onClick={handleDownload}
-              className="flex items-center gap-2 px-8 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors shadow-md shadow-primary/20"
-              data-testid="button-download-qr">
-              <Download className="w-4 h-4" /> Download PNG
-            </button>
+            <div className="flex gap-3 w-full justify-center">
+              <button onClick={handleDownload}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:bg-primary/90 transition-colors shadow-md shadow-primary/20"
+                data-testid="button-download-qr">
+                <Download className="w-4 h-4" /> Download
+              </button>
+              <button onClick={handleShare}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-secondary text-foreground font-semibold text-sm hover:bg-secondary/70 transition-colors border border-border"
+                data-testid="button-share-qr">
+                <Share2 className="w-4 h-4" /> Share
+              </button>
+            </div>
           </Card>
         )}
       </div>

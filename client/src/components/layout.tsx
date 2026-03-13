@@ -1,14 +1,15 @@
 import { Link, useLocation } from "wouter";
-import { Scan, History, QrCode } from "lucide-react";
+import { Scan, History, QrCode, Settings } from "lucide-react";
 import { cn } from "./ui-elements";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
 
   const navItems = [
-    { href: "/", label: "Scan", icon: Scan },
-    { href: "/generate", label: "Generate", icon: QrCode },
-    { href: "/history", label: "History", icon: History },
+    { href: "/",         label: "Scan",     icon: Scan     },
+    { href: "/generate", label: "Generate", icon: QrCode   },
+    { href: "/history",  label: "History",  icon: History  },
+    { href: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (
@@ -59,13 +60,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-panel border-t border-border/50 z-50 px-6 py-3 flex items-center justify-around pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-panel border-t border-border/50 z-50 px-2 py-3 flex items-center justify-around pb-safe">
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-300",
+              "flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-all duration-300",
               location === item.href ? "text-primary" : "text-muted-foreground"
             )}
           >
@@ -73,7 +74,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               "p-2 rounded-xl transition-all duration-300",
               location === item.href ? "bg-primary/10 scale-110" : ""
             )}>
-              <item.icon className="w-6 h-6" />
+              <item.icon className="w-5 h-5" />
             </div>
             <span className="text-xs font-medium">{item.label}</span>
           </Link>
