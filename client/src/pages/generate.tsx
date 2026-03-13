@@ -288,6 +288,51 @@ export default function Generate() {
               ))}
             </div>
 
+            {/* ── Logo from gallery — always visible ── */}
+            <Card className="p-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                Center Logo (optional)
+              </p>
+              {logo ? (
+                <div className="flex items-center gap-4">
+                  <img src={logo} alt="Logo" className="w-16 h-16 rounded-2xl object-contain border border-border bg-white p-1.5 shadow-sm" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">Logo added</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Will appear in the center of your QR code</p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => logoInputRef.current?.click()}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary hover:bg-secondary/70 text-foreground text-xs font-medium transition-colors"
+                      data-testid="button-change-logo">
+                      <Upload className="w-3.5 h-3.5" /> Change
+                    </button>
+                    <button
+                      onClick={() => { setLogo(null); if (logoInputRef.current) logoInputRef.current.value = ""; }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-destructive/10 hover:bg-destructive/20 text-destructive text-xs font-medium transition-colors"
+                      data-testid="button-remove-logo">
+                      <X className="w-3.5 h-3.5" /> Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => logoInputRef.current?.click()}
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                  data-testid="button-upload-logo-gallery">
+                  <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
+                    <Upload className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-foreground">Add logo from gallery</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Pick an image from your phone — it appears in the center of the QR code</p>
+                  </div>
+                </button>
+              )}
+              <input ref={logoInputRef} type="file" accept="image/*" className="hidden"
+                onChange={handleLogoUpload} data-testid="input-logo-file" />
+            </Card>
+
             {/* Active template form */}
             {activeTemplate && (
               <Card className="p-6 space-y-5 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -304,12 +349,12 @@ export default function Generate() {
                 {activeTemplate === "whatsapp"  && <WhatsAppForm onGenerate={handleGenerate} />}
                 {activeTemplate === "instagram" && <InstagramForm onGenerate={handleGenerate} />}
 
-                {/* Customization toggle inside template too */}
+                {/* Customization toggle inside template */}
                 <div className="border-t border-border/50 pt-4 space-y-3">
                   <button onClick={() => setShowCustomize(p => !p)}
                     className="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
                     <Palette className="w-4 h-4" />
-                    Customize style
+                    Customize colors
                     {showCustomize ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </button>
                   {showCustomize && <CustomizePanel fgColor={fgColor} setFgColor={setFgColor} bgColor={bgColor} setBgColor={setBgColor} logo={logo} setLogo={setLogo} logoInputRef={logoInputRef} handleLogoUpload={handleLogoUpload} />}
